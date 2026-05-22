@@ -444,8 +444,8 @@ export default function AuthModal() {
           exit="exit"
           className="relative w-full max-w-4xl h-auto min-h-[520px] rounded-2xl overflow-hidden flex flex-col md:flex-row"
           style={{ 
-            background: 'var(--background)', 
-            border: '1px solid var(--border)',
+            background: '#0B0A09', 
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.9), 0 0 1px 1px rgba(199, 255, 63, 0.05)'
           }}
           onClick={(e) => e.stopPropagation()}
@@ -608,7 +608,7 @@ export default function AuthModal() {
             {/* Separator */}
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
-              <span className="text-[10px] uppercase font-medium font-mono" style={{ color: '#444444' }}>or continue with</span>
+              <span className="text-[10px] uppercase font-medium font-mono" style={{ color: '#888888' }}>or continue with</span>
               <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
             </div>
 
@@ -629,7 +629,7 @@ export default function AuthModal() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -670,7 +670,7 @@ export default function AuthModal() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -758,7 +758,7 @@ export default function AuthModal() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value.trim())}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -789,7 +789,7 @@ export default function AuthModal() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-4 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -827,7 +827,7 @@ export default function AuthModal() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -880,7 +880,7 @@ export default function AuthModal() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       disabled={isLoading}
-                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none"
+                      className="w-full text-xs py-2.5 pl-10 pr-10 rounded-lg bg-white/[0.02] border transition-all duration-200 outline-none placeholder-gray-500"
                       style={{ 
                         borderColor: 'rgba(255,255,255,0.06)',
                         color: '#F5F5F5'
@@ -998,7 +998,7 @@ export default function AuthModal() {
               {/* Guest option */}
               <div className="flex items-center gap-3 w-full mt-1">
                 <div className="flex-1 h-px bg-white/5" />
-                <span className="text-[10px] uppercase font-mono font-medium" style={{ color: '#444444' }}>alternative</span>
+                <span className="text-[10px] uppercase font-mono font-medium" style={{ color: '#888888' }}>alternative</span>
                 <div className="flex-1 h-px bg-white/5" />
               </div>
 
