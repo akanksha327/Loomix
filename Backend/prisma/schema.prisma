@@ -1,0 +1,380 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  username           String               @unique
+  displayName        String?
+  passwordHash       String?
+  provider           String?
+  bio                String?
+  avatarUrl          String?
+  bannerUrl          String?
+  usernameChangedAt  DateTime?
+  role               UserRole             @default(USER)
+  emailVerified      Boolean              @default(false)
+  lastSeenAt         DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  posts              Post[]
+  comments           Comment[]
+  sessions           Session[]
+  settings           UserSettings?
+  memberships        CommunityMember[]
+  createdCommunities Community[]          @relation("CommunityCreator")
+  postVotes          PostVote[]
+  commentVotes       CommentVote[]
+  savedPosts         SavedPost[]
+  uploadedMedia      MediaAsset[]
+  notifications      Notification[]       @relation("NotificationRecipient")
+  notificationsSent  Notification[]       @relation("NotificationActor")
+  followers          Follow[]             @relation("FollowedUser")
+  following          Follow[]             @relation("FollowingUser")
+  conversations      ConversationParticipant[]
+  sentMessages       Message[]            @relation("SentMessages")
+  blockedUsers       BlockedUser[]        @relation("BlockingUser")
+  blockedBy          BlockedUser[]        @relation("BlockedUser")
+  moderationActions  ModerationAction[]   @relation("ModeratorActions")
+
+  @@index([username])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model Post {
+  id           String       @id @default(cuid())
+  title        String
+  content      String?
+  type         PostType     @default(TEXT)
+  url          String?
+  mediaUrl     String?
+  tags         String[]     @default([])
+  published    Boolean      @default(true)
+  score        Int          @default(0)
+  upvotes      Int          @default(0)
+  downvotes    Int          @default(0)
+  commentCount Int          @default(0)
+  viewCount    Int          @default(0)
+  deletedAt    DateTime?
+  authorId     String
+  communityId  String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  community    Community?   @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  comments     Comment[]
+  votes        PostVote[]
+  savedBy      SavedPost[]
+  media        MediaAsset[]
+
+  @@index([authorId, createdAt])
+  @@index([communityId, createdAt])
+  @@index([score, createdAt])
+  @@index([deletedAt])
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  body        String
+  score       Int           @default(0)
+  upvotes     Int           @default(0)
+  downvotes   Int           @default(0)
+  deletedAt   DateTime?
+  authorId    String
+  postId      String
+  parentId    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post        Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent      Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[]     @relation("CommentReplies")
+  votes       CommentVote[]
+
+  @@index([postId, createdAt])
+  @@index([parentId, createdAt])
+  @@index([authorId, createdAt])
+  @@index([deletedAt])
+}
+
+model Community {
+  id          String             @id @default(cuid())
+  name        String             @unique
+  slug        String             @unique
+  description String?
+  avatarUrl   String?
+  bannerUrl   String?
+  visibility  CommunityVisibility @default(PUBLIC)
+  memberCount Int                @default(1)
+  postCount   Int                @default(0)
+  deletedAt   DateTime?
+  creatorId   String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  creator     User               @relation("CommunityCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  members     CommunityMember[]
+  posts       Post[]
+  actions     ModerationAction[]
+
+  @@index([slug])
+  @@index([memberCount])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model CommunityMember {
+  id          String        @id @default(cuid())
+  userId      String
+  communityId String
+  role        CommunityRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community   Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index([communityId, role])
+  @@index([userId])
+}
+
+model PostVote {
+  id        String   @id @default(cuid())
+  value     Int
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId, value])
+}
+
+model CommentVote {
+  id        String   @id @default(cuid())
+  value     Int
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@index([commentId, value])
+}
+
+model SavedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId, createdAt])
+}
+
+model Session {
+  id               String    @id @default(cuid())
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  rotatedAt        DateTime?
+  userId           String
+  createdAt        DateTime  @default(now())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([email, usedAt])
+}
+
+model UserSettings {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  theme                  String   @default("system")
+  accentColor            String   @default("#C7FF3F")
+  uiDensity              String   @default("default")
+  motionEffects          Boolean  @default(true)
+  privacy                Json     @default("{\"showProfile\":true,\"showActivity\":true,\"allowMessages\":true,\"allowFollowers\":true}")
+  notifications          Json     @default("{\"email\":true,\"push\":true,\"threadActivity\":true,\"follows\":true,\"messages\":true}")
+  security               Json     @default("{\"twoFactorEnabled\":false}")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  type       NotificationType
+  entityType String?
+  entityId   String?
+  message    String
+  data       Json?
+  readAt     DateTime?
+  userId     String
+  actorId    String?
+  createdAt  DateTime         @default(now())
+  user       User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor      User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt, createdAt])
+  @@index([type, createdAt])
+}
+
+model MediaAsset {
+  id         String    @id @default(cuid())
+  provider   String
+  publicId   String?
+  url        String
+  mimeType   String
+  size       Int
+  kind       MediaKind
+  uploaderId String
+  postId     String?
+  createdAt  DateTime  @default(now())
+  uploader   User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  post       Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([uploaderId, createdAt])
+  @@index([postId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("FollowingUser", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("FollowedUser", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+model Conversation {
+  id           String                    @id @default(cuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([updatedAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+model BlockedUser {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker   User     @relation("BlockingUser", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("BlockedUser", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model ModerationAction {
+  id          String   @id @default(cuid())
+  action      String
+  reason      String?
+  targetType  String
+  targetId    String
+  moderatorId String
+  communityId String?
+  createdAt   DateTime @default(now())
+  moderator   User     @relation("ModeratorActions", fields: [moderatorId], references: [id], onDelete: Restrict)
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  @@index([communityId, createdAt])
+  @@index([targetType, targetId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CommunityRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+  OWNER
+}
+
+enum CommunityVisibility {
+  PUBLIC
+  RESTRICTED
+  PRIVATE
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  LINK
+  MEDIA
+}
+
+enum NotificationType {
+  UPVOTE
+  REPLY
+  MENTION
+  FOLLOW
+  COMMUNITY_INVITE
+  MODERATION
+}
+
+enum MediaKind {
+  AVATAR
+  BANNER
+  POST
+}
