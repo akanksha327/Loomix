@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="light">
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -93,6 +93,10 @@ export default function RootLayout({
                     } else {
                       document.documentElement.classList.remove('motion-reduce');
                     }
+                  } else {
+                    // No settings saved yet — default to dark
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
                   }
                 } catch (e) {
                   console.error('Settings parse error:', e);
